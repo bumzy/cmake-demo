@@ -1,30 +1,57 @@
 cmake_minimum_required(VERSION 3.5)
 
-# Set the project name
-project (google_test_example)
+########################################
+# Project setup
+########################################
+project(cmake-demo)
 
-# Add an library for the example classes
-add_library(example_google_test
-    Reverse.cpp
-    Palindrome.cpp
+########################################
+# Define include directories
+########################################
+set(ALL_INCLUDES
+    ${PROJECT_SOURCE_DIR}
+    ${PROJECT_SOURCE_DIR}/include/cmake-demo
+)
+include_directories(${ALL_INCLUDES})
+
+########################################
+# Source files
+########################################
+file(GLOB SOURCES
+    ${PROJECT_SOURCE_DIR}/src/*.cpp
+)
+
+########################################
+# Create a library
+########################################
+add_library(cmake-demo
+    ${SOURCES}
 )
 
 
-#############################################
+########################################
 # Unit tests
-
+########################################
 add_subdirectory(third_party/googletest)
 
-# enable CTest testing
+# enable GTest testing
 enable_testing()
 
-# Add a testing executable
-add_executable(unit_tests unit_tests.cpp)
+file(GLOB TEST_SRC_FILES ${PROJECT_SOURCE_DIR}/test/*.cpp)
 
-target_link_libraries(unit_tests
-    example_google_test
-    gtest
-    gtest_main
-)
+# from list of files we'll create tests test_name.cpp -> test_name
+foreach(_test_file ${TEST_SRC_FILES})
+    get_filename_component(_test_name ${_test_file} NAME_WE)
+    add_executable(${_test_name} ${_test_file})
+    target_link_libraries(${_test_name}
+        cmake-demo
+        gtest
+        gtest_main
+    )
+    set_target_properties(${_test_name}
+        PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/output/test
+    )
+    add_test(${_test_name} ${_test_name})
+endforeach()
 
-add_test(test_all unit_tests)
