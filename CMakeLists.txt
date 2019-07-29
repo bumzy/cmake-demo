@@ -16,6 +16,9 @@ SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/output/bin)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -Wall")
 set(CMAKE_CXX_STANDARD 11)
 
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+
 ########################################
 # Copy dictionary
 ########################################
@@ -38,6 +41,12 @@ include_directories(${ALL_INCLUDES})
 set(JSON_BuildTests OFF CACHE INTERNAL "")
 add_subdirectory(third_party/json)
 
+set(BENCHMARK_ENABLE_TESTING OFF CACHE INTERNAL "")
+set(gRPC_BUILD_TESTS OFF CACHE INTERNAL "")
+set(gRPC_BUILD_CODEGEN OFF CACHE INTERNAL "")
+add_subdirectory(third_party/grpc)
+message(STATUS "Using gRPC via add_subdirectory.")
+
 ########################################
 # Source files
 ########################################
@@ -50,6 +59,13 @@ file(GLOB SOURCES
 ########################################
 add_library(cmake-demo
     ${SOURCES}
+)
+
+target_link_libraries(cmake-demo
+    PRIVATE
+        Threads::Threads
+        nlohmann_json::nlohmann_json
+        ${_PROTOBUF_LIBPROTOBUF}
 )
 
 ########################################
