@@ -9,7 +9,7 @@
 class Palindrome
 {
 public:
-    bool isPalindrome(const std::string& toCheck);
+    bool is_palindrome(const std::string& toCheck);
 };
 
 #endif

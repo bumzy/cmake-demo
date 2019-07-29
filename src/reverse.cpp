@@ -1,4 +1,4 @@
-#include "Reverse.h"
+#include "reverse.h"
 
 std::string Reverse::reverse(std::string& toReverse)
 {

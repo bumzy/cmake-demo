@@ -1,6 +1,6 @@
-#include "Palindrome.h"
+#include "palindrome.h"
 
-bool Palindrome::isPalindrome(const std::string& toCheck)
+bool Palindrome::is_palindrome(const std::string& toCheck)
 {
 
     if (toCheck == std::string(toCheck.rbegin(), toCheck.rend())) {

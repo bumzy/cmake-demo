@@ -6,13 +6,37 @@ cmake_minimum_required(VERSION 3.5)
 project(cmake-demo)
 
 ########################################
+# Set up output path
+########################################
+SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/output/bin)
+
+########################################
+# Set up the compiler flags
+########################################
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -Wall")
+set(CMAKE_CXX_STANDARD 11)
+
+########################################
+# Copy dictionary
+########################################
+file(COPY conf DESTINATION ${PROJECT_BINARY_DIR}/output)
+file(COPY data DESTINATION ${PROJECT_BINARY_DIR}/output)
+
+########################################
 # Define include directories
 ########################################
 set(ALL_INCLUDES
     ${PROJECT_SOURCE_DIR}
+    ${PROJECT_SOURCE_DIR}/src
     ${PROJECT_SOURCE_DIR}/include/cmake-demo
 )
 include_directories(${ALL_INCLUDES})
+
+########################################
+# Third Party JSON
+########################################
+set(JSON_BuildTests OFF CACHE INTERNAL "")
+add_subdirectory(third_party/json)
 
 ########################################
 # Source files
@@ -28,6 +52,17 @@ add_library(cmake-demo
     ${SOURCES}
 )
 
+########################################
+# Tools
+########################################
+add_executable(cmake_demo_tool
+    tool/cmake_demo_tool.cpp
+)
+
+target_link_libraries(cmake_demo_tool
+    PRIVATE
+        cmake-demo
+)
 
 ########################################
 # Unit tests

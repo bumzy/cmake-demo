@@ -1,6 +1,6 @@
 #include <string>
-#include "Reverse.h"
-#include "Palindrome.h"
+#include "reverse.h"
+#include "palindrome.h"
 
 #include <gtest/gtest.h>
 
@@ -34,6 +34,6 @@ TEST_F(ReverseTests,  is_palindrome )
     std::string pal = "mom";
     Palindrome pally;
 
-    EXPECT_TRUE(pally.isPalindrome(pal));
+    EXPECT_TRUE(pally.is_palindrome(pal));
 
 }
