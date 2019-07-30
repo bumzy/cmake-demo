@@ -45,6 +45,7 @@ add_subdirectory(third_party/json)
 
 set(BENCHMARK_ENABLE_TESTING OFF CACHE INTERNAL "")
 set(gRPC_BUILD_TESTS OFF CACHE INTERNAL "")
+# set(gRPC_SSL_PROVIDER "package" CACHE STRING "Provider of ssl library")
 # set(gRPC_BUILD_CODEGEN OFF CACHE INTERNAL "")
 # set(gRPC_BUILD_CSHARP_EXT OFF CACHE INTERNAL "")
 add_subdirectory(third_party/grpc)
