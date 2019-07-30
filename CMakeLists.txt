@@ -13,7 +13,7 @@ project(cmake-demo)
 ########################################
 # Set up the compiler flags
 ########################################
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -Wall")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -Wall -mcmodel=medium")
 set(CMAKE_CXX_STANDARD 11)
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
@@ -45,6 +45,7 @@ add_subdirectory(third_party/json)
 
 set(BENCHMARK_ENABLE_TESTING OFF CACHE INTERNAL "")
 set(gRPC_BUILD_TESTS OFF CACHE INTERNAL "")
+set(gRPC_SSL_PROVIDER "package" CACHE STRING "Provider of ssl library")
 # set(gRPC_BUILD_CODEGEN OFF CACHE INTERNAL "")
 # set(gRPC_BUILD_CSHARP_EXT OFF CACHE INTERNAL "")
 add_subdirectory(third_party/grpc)
