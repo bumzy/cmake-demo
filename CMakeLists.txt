@@ -8,7 +8,7 @@ project(cmake-demo)
 ########################################
 # Set up output path
 ########################################
-SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/output/bin)
+# SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/output/bin)
 
 ########################################
 # Set up the compiler flags
@@ -44,6 +44,7 @@ add_subdirectory(third_party/json)
 set(BENCHMARK_ENABLE_TESTING OFF CACHE INTERNAL "")
 set(gRPC_BUILD_TESTS OFF CACHE INTERNAL "")
 set(gRPC_BUILD_CODEGEN OFF CACHE INTERNAL "")
+set(gRPC_BUILD_CSHARP_EXT OFF CACHE INTERNAL "")
 add_subdirectory(third_party/grpc)
 message(STATUS "Using gRPC via add_subdirectory.")
 
@@ -78,6 +79,10 @@ add_executable(cmake_demo_tool
 target_link_libraries(cmake_demo_tool
     PRIVATE
         cmake-demo
+)
+set_target_properties(cmake_demo_tool
+    PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/output/bin
 )
 
 ########################################
