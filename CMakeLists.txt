@@ -43,6 +43,10 @@ include_directories(${ALL_INCLUDES})
 set(JSON_BuildTests OFF CACHE INTERNAL "")
 add_subdirectory(third_party/json)
 
+# Boost
+add_subdirectory(third_party/boost-cmake)
+
+# grpc
 set(BENCHMARK_ENABLE_TESTING OFF CACHE INTERNAL "")
 set(gRPC_BUILD_TESTS OFF CACHE INTERNAL "")
 # set(gRPC_SSL_PROVIDER "package" CACHE STRING "Provider of ssl library")
@@ -102,6 +106,8 @@ target_link_libraries(cmake-demo
         nlohmann_json::nlohmann_json
         ${_GRPC_GRPCPP_UNSECURE}
         ${_PROTOBUF_LIBPROTOBUF}
+        PUBLIC Boost::filesystem
+        PUBLIC Boost::boost
 )
 
 set_target_properties(cmake-demo
