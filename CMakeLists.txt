@@ -13,7 +13,7 @@ project(cmake-demo)
 ########################################
 # Set up the compiler flags
 ########################################
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -Wall -mcmodel=medium")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -o3 -Wall")
 set(CMAKE_CXX_STANDARD 11)
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
@@ -33,6 +33,7 @@ set(ALL_INCLUDES
     ${PROJECT_SOURCE_DIR}
     ${PROJECT_SOURCE_DIR}/src
     ${PROJECT_SOURCE_DIR}/include/cmake-demo
+    ${PROJECT_BINARY_DIR}/output/proto
 )
 include_directories(${ALL_INCLUDES})
 
@@ -52,8 +53,10 @@ set(gRPC_BUILD_TESTS OFF CACHE INTERNAL "")
 # set(gRPC_SSL_PROVIDER "package" CACHE STRING "Provider of ssl library")
 # set(gRPC_BUILD_CODEGEN OFF CACHE INTERNAL "")
 # set(gRPC_BUILD_CSHARP_EXT OFF CACHE INTERNAL "")
-add_subdirectory(third_party/grpc)
-message(STATUS "Using gRPC via add_subdirectory.")
+if (NOT TARGET grpc)
+    add_subdirectory(third_party/grpc)
+    message(STATUS "Using gRPC via add_subdirectory.")
+endif()
 
 # After using add_subdirectory, we can now use the grpc targets directly from
 # this build.
@@ -62,27 +65,35 @@ set(_PROTOBUF_PROTOC $<TARGET_FILE:protoc>)
 set(_GRPC_GRPCPP_UNSECURE grpc++_unsecure)
 set(_GRPC_CPP_PLUGIN_EXECUTABLE $<TARGET_FILE:grpc_cpp_plugin>)
 
-# Proto file
-get_filename_component(hw_proto "${PROJECT_SOURCE_DIR}/proto/helloworld.proto" ABSOLUTE)
-get_filename_component(hw_proto_path "${hw_proto}" PATH)
 
 # Generated sources
-set(hw_proto_srcs "${CMAKE_CURRENT_BINARY_DIR}/output/proto/helloworld.pb.cc")
-set(hw_proto_hdrs "${CMAKE_CURRENT_BINARY_DIR}/output/proto/helloworld.pb.h")
-set(hw_grpc_srcs "${CMAKE_CURRENT_BINARY_DIR}/output/proto/helloworld.grpc.pb.cc")
-set(hw_grpc_hdrs "${CMAKE_CURRENT_BINARY_DIR}/output/proto/helloworld.grpc.pb.h")
-add_custom_command(
-      OUTPUT "${hw_proto_srcs}" "${hw_proto_hdrs}" "${hw_grpc_srcs}" "${hw_grpc_hdrs}"
-      COMMAND ${_PROTOBUF_PROTOC}
-      ARGS --grpc_out "${CMAKE_CURRENT_BINARY_DIR}/output/proto"
-        --cpp_out "${CMAKE_CURRENT_BINARY_DIR}/output/proto"
-        -I "${hw_proto_path}"
-        --plugin=protoc-gen-grpc="${_GRPC_CPP_PLUGIN_EXECUTABLE}"
-        "${hw_proto}"
-      DEPENDS "${hw_proto}")
-
-# Include generated *.pb.h files
-include_directories("${CMAKE_CURRENT_BINARY_DIR}/output/proto")
+set(_PROTO_SRCS "")
+set(_GRPC_SRCS "")
+set(_PROTO_OUTPUT ${PROJECT_BINARY_DIR}/output/proto)
+file(GLOB PROTO_FILES ${PROJECT_SOURCE_DIR}/proto/*.proto)
+foreach(_proto_file ${PROTO_FILES})
+    # message("${_proto_file}")
+    get_filename_component(_proto_file "${_proto_file}" ABSOLUTE)
+    get_filename_component(_proto_file_path "${_proto_file}" PATH)
+    get_filename_component(_proto_file_name "${_proto_file}" NAME_WE)
+    set(_proto_src "${_PROTO_OUTPUT}/${_proto_file_name}.pb.cc")
+    set(_proto_hdr "${_PROTO_OUTPUT}/${_proto_file_name}.pb.h")
+    set(_grpc_src "${_PROTO_OUTPUT}/${_proto_file_name}.grpc.pb.cc")
+    set(_grpc_hdr "${_PROTO_OUTPUT}/${_proto_file_name}.grpc.pb.h")
+    # message("${_proto_src}")
+    add_custom_command(
+        OUTPUT "${_proto_src}" "${_proto_hdr}" "${_grpc_src}" "${_grpc_hdr}"
+        COMMAND ${_PROTOBUF_PROTOC}
+        ARGS  --grpc_out "${_PROTO_OUTPUT}"
+            --cpp_out "${_PROTO_OUTPUT}"
+            -I "${_proto_file_path}"
+            --plugin=protoc-gen-grpc="${_GRPC_CPP_PLUGIN_EXECUTABLE}"
+            "${_proto_file}"
+        DEPENDS "${_proto_file}"
+    )
+    list(APPEND _PROTO_SRCS "${_proto_src}")
+    list(APPEND _GRPC_SRCS "${_grpc_src}")
+endforeach()
 
 ########################################
 # Source files
@@ -96,8 +107,8 @@ file(GLOB SOURCES
 ########################################
 add_library(cmake-demo STATIC
     ${SOURCES}
-    ${hw_proto_srcs}
-    ${hw_grpc_srcs}
+    ${_PROTO_SRCS}
+    ${_GRPC_SRCS}
 )
 
 target_link_libraries(cmake-demo
@@ -119,7 +130,7 @@ set_target_properties(cmake-demo
 ########################################
 # Tool
 ########################################
-file(GLOB TOOL_SRC_FILES ${PROJECT_SOURCE_DIR}/tool/*.cpp)
+file(GLOB TOOL_SRC_FILES ${PROJECT_SOURCE_DIR}/tool/*.cpp ${PROJECT_SOURCE_DIR}/tool/*.cc)
 foreach(_tool_file ${TOOL_SRC_FILES})
     get_filename_component(_tool_name ${_tool_file} NAME_WE)
     add_executable(${_tool_name} ${_tool_file})
