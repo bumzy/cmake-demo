@@ -24,6 +24,7 @@ find_package(Threads REQUIRED)
 ########################################
 file(COPY conf DESTINATION ${PROJECT_BINARY_DIR}/output)
 file(COPY data DESTINATION ${PROJECT_BINARY_DIR}/output)
+file(COPY include DESTINATION ${PROJECT_BINARY_DIR}/output)
 file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/output/proto)
 
 ########################################
@@ -119,6 +120,11 @@ target_link_libraries(cmake-demo
         ${_PROTOBUF_LIBPROTOBUF}
         PUBLIC Boost::filesystem
         PUBLIC Boost::boost
+)
+
+target_include_directories(${PROJECT_NAME}
+    INTERFACE
+        ${PROJECT_SOURCE_DIR}/include
 )
 
 set_target_properties(cmake-demo
