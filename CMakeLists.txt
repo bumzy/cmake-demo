@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.15)
 
 ########################################
 # Project setup
@@ -10,10 +10,12 @@ project(cmake-demo)
 ########################################
 # SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/output/bin)
 
+include(FetchContent)
+
 ########################################
 # Set up the compiler flags
 ########################################
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -o3 -Wall")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O3 -Wall")
 set(CMAKE_CXX_STANDARD 11)
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
@@ -22,6 +24,11 @@ find_package(Threads REQUIRED)
 ########################################
 # Copy dictionary
 ########################################
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/output/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/output/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/output/bin)
+# message("CMAKE_BINARY_DIR:" ${CMAKE_BINARY_DIR})
+# message("PROJECT_BINARY_DIR": ${PROJECT_BINARY_DIR})
 file(COPY conf DESTINATION ${PROJECT_BINARY_DIR}/output)
 file(COPY data DESTINATION ${PROJECT_BINARY_DIR}/output)
 file(COPY include DESTINATION ${PROJECT_BINARY_DIR}/output)
@@ -41,23 +48,60 @@ include_directories(${ALL_INCLUDES})
 ########################################
 # Third Party
 ########################################
+# gooletest
+FetchContent_Declare(
+  googletest
+  GIT_REPOSITORY https://github.com/google/googletest.git
+  GIT_TAG        release-1.10.0
+)
+FetchContent_GetProperties(googletest)
+if(NOT googletest_POPULATED)
+  FetchContent_Populate(googletest)
+  add_subdirectory(${googletest_SOURCE_DIR} ${googletest_BINARY_DIR})
+endif()
+
 # nlohmann JSON
-set(JSON_BuildTests OFF CACHE INTERNAL "")
-add_subdirectory(third_party/json)
+# add_subdirectory(third_party/json)
+# include(FetchContent)
+FetchContent_Declare(
+    json
+    GIT_REPOSITORY https://github.com/nlohmann/json
+    GIT_TAG v3.7.3
+)
+# set(JSON_BuildTests OFF CACHE INTERNAL "")
+FetchContent_GetProperties(json)
+if(NOT json_POPULATED)
+    FetchContent_Populate(json)
+    add_subdirectory(${json_SOURCE_DIR} ${json_BINARY_DIR} EXCLUDE_FROM_ALL)
+endif()
 
 # Boost
-add_subdirectory(third_party/boost-cmake)
+# add_subdirectory(third_party/boost-cmake)
 
-# grpc
+# gRPC
+FetchContent_Declare(
+    gRPC
+    GIT_REPOSITORY https://github.com/grpc/grpc
+    GIT_TAG        v1.28.1
+)
 set(BENCHMARK_ENABLE_TESTING OFF CACHE INTERNAL "")
 set(gRPC_BUILD_TESTS OFF CACHE INTERNAL "")
-# set(gRPC_SSL_PROVIDER "package" CACHE STRING "Provider of ssl library")
-# set(gRPC_BUILD_CODEGEN OFF CACHE INTERNAL "")
-# set(gRPC_BUILD_CSHARP_EXT OFF CACHE INTERNAL "")
-if (NOT TARGET grpc)
-    add_subdirectory(third_party/grpc)
-    message(STATUS "Using gRPC via add_subdirectory.")
-endif()
+FetchContent_MakeAvailable(gRPC)
+# FetchContent_GetProperties(gRPC)
+# if(NOT gRPC_POPULATED)
+#     FetchContent_Populate(gRPC)
+#     add_subdirectory(${gRPC_SOURCE_DIR} ${gRPC_BINARY_DIR})
+# endif()
+
+# set(BENCHMARK_ENABLE_TESTING OFF CACHE INTERNAL "")
+# set(gRPC_BUILD_TESTS OFF CACHE INTERNAL "")
+# # set(gRPC_SSL_PROVIDER "package" CACHE STRING "Provider of ssl library")
+# # set(gRPC_BUILD_CODEGEN OFF CACHE INTERNAL "")
+# # set(gRPC_BUILD_CSHARP_EXT OFF CACHE INTERNAL "")
+# if (NOT TARGET grpc)
+#     add_subdirectory(third_party/grpc)
+#     message(STATUS "Using gRPC via add_subdirectory.")
+# endif()
 
 # After using add_subdirectory, we can now use the grpc targets directly from
 # this build.
@@ -118,8 +162,8 @@ target_link_libraries(cmake-demo
         nlohmann_json::nlohmann_json
         ${_GRPC_GRPCPP_UNSECURE}
         ${_PROTOBUF_LIBPROTOBUF}
-        PUBLIC Boost::filesystem
-        PUBLIC Boost::boost
+        # PUBLIC Boost::filesystem
+        # PUBLIC Boost::boost
 )
 
 target_include_directories(${PROJECT_NAME}
@@ -166,10 +210,9 @@ endforeach()
 ########################################
 # Unit tests
 ########################################
-add_subdirectory(third_party/googletest)
 
 # enable GTest testing
-enable_testing()
+# enable_testing()
 
 file(GLOB TEST_SRC_FILES ${PROJECT_SOURCE_DIR}/test/*.cpp)
 
