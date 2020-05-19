@@ -10,7 +10,6 @@ project(cmake-demo)
 ########################################
 # SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/output/bin)
 
-include(FetchContent)
 
 ########################################
 # Set up the compiler flags
@@ -24,9 +23,6 @@ find_package(Threads REQUIRED)
 ########################################
 # Copy dictionary
 ########################################
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/output/lib)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/output/lib)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/output/bin)
 # message("CMAKE_BINARY_DIR:" ${CMAKE_BINARY_DIR})
 # message("PROJECT_BINARY_DIR": ${PROJECT_BINARY_DIR})
 file(COPY conf DESTINATION ${PROJECT_BINARY_DIR}/output)
@@ -48,6 +44,8 @@ include_directories(${ALL_INCLUDES})
 ########################################
 # Third Party
 ########################################
+include(FetchContent)
+
 # gooletest
 FetchContent_Declare(
   googletest
@@ -56,27 +54,21 @@ FetchContent_Declare(
 )
 FetchContent_GetProperties(googletest)
 if(NOT googletest_POPULATED)
-  FetchContent_Populate(googletest)
-  add_subdirectory(${googletest_SOURCE_DIR} ${googletest_BINARY_DIR})
+    FetchContent_Populate(googletest)
+    add_subdirectory(${googletest_SOURCE_DIR} ${googletest_BINARY_DIR})
 endif()
 
 # nlohmann JSON
-# add_subdirectory(third_party/json)
-# include(FetchContent)
 FetchContent_Declare(
     json
     GIT_REPOSITORY https://github.com/nlohmann/json
     GIT_TAG v3.7.3
 )
-# set(JSON_BuildTests OFF CACHE INTERNAL "")
 FetchContent_GetProperties(json)
 if(NOT json_POPULATED)
     FetchContent_Populate(json)
     add_subdirectory(${json_SOURCE_DIR} ${json_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif()
-
-# Boost
-# add_subdirectory(third_party/boost-cmake)
 
 # gRPC
 FetchContent_Declare(
@@ -87,21 +79,6 @@ FetchContent_Declare(
 set(BENCHMARK_ENABLE_TESTING OFF CACHE INTERNAL "")
 set(gRPC_BUILD_TESTS OFF CACHE INTERNAL "")
 FetchContent_MakeAvailable(gRPC)
-# FetchContent_GetProperties(gRPC)
-# if(NOT gRPC_POPULATED)
-#     FetchContent_Populate(gRPC)
-#     add_subdirectory(${gRPC_SOURCE_DIR} ${gRPC_BINARY_DIR})
-# endif()
-
-# set(BENCHMARK_ENABLE_TESTING OFF CACHE INTERNAL "")
-# set(gRPC_BUILD_TESTS OFF CACHE INTERNAL "")
-# # set(gRPC_SSL_PROVIDER "package" CACHE STRING "Provider of ssl library")
-# # set(gRPC_BUILD_CODEGEN OFF CACHE INTERNAL "")
-# # set(gRPC_BUILD_CSHARP_EXT OFF CACHE INTERNAL "")
-# if (NOT TARGET grpc)
-#     add_subdirectory(third_party/grpc)
-#     message(STATUS "Using gRPC via add_subdirectory.")
-# endif()
 
 # After using add_subdirectory, we can now use the grpc targets directly from
 # this build.
@@ -162,8 +139,6 @@ target_link_libraries(cmake-demo
         nlohmann_json::nlohmann_json
         ${_GRPC_GRPCPP_UNSECURE}
         ${_PROTOBUF_LIBPROTOBUF}
-        # PUBLIC Boost::filesystem
-        # PUBLIC Boost::boost
 )
 
 target_include_directories(${PROJECT_NAME}
@@ -194,26 +169,9 @@ foreach(_tool_file ${TOOL_SRC_FILES})
     )
 endforeach()
 
-# add_executable(cmake_demo_tool
-#     tool/cmake_demo_tool.cpp
-# )
-
-# target_link_libraries(cmake_demo_tool
-#     PRIVATE
-#         cmake-demo
-# )
-# set_target_properties(cmake_demo_tool
-#     PROPERTIES
-#     RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/output/bin
-# )
-
 ########################################
 # Unit tests
 ########################################
-
-# enable GTest testing
-# enable_testing()
-
 file(GLOB TEST_SRC_FILES ${PROJECT_SOURCE_DIR}/test/*.cpp)
 
 # from list of files we'll create tests test_name.cpp -> test_name
