@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.14)
 
 ########################################
 # Project setup
@@ -23,8 +23,6 @@ find_package(Threads REQUIRED)
 ########################################
 # Copy dictionary
 ########################################
-# message("CMAKE_BINARY_DIR:" ${CMAKE_BINARY_DIR})
-# message("PROJECT_BINARY_DIR": ${PROJECT_BINARY_DIR})
 file(COPY conf DESTINATION ${PROJECT_BINARY_DIR}/output)
 file(COPY data DESTINATION ${PROJECT_BINARY_DIR}/output)
 file(COPY include DESTINATION ${PROJECT_BINARY_DIR}/output)
@@ -52,6 +50,7 @@ FetchContent_Declare(
   GIT_REPOSITORY https://github.com/google/googletest.git
   GIT_TAG        release-1.10.0
 )
+# CMake 3.11+
 FetchContent_GetProperties(googletest)
 if(NOT googletest_POPULATED)
     FetchContent_Populate(googletest)
@@ -78,6 +77,7 @@ FetchContent_Declare(
 )
 set(BENCHMARK_ENABLE_TESTING OFF CACHE INTERNAL "")
 set(gRPC_BUILD_TESTS OFF CACHE INTERNAL "")
+# CMake 3.14+
 FetchContent_MakeAvailable(gRPC)
 
 # After using add_subdirectory, we can now use the grpc targets directly from

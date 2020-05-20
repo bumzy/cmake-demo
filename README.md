@@ -14,12 +14,7 @@ C++ project demo build with CMake using third party gRPC, gtest and JSON
  * `make`
 
 ## Add Third Party
- * `mkdir -p third_party && cd third_party`
- * `git submodule add <repository>`
- * `cd repository_dir`
- * `git tag` select release vX.X.X
- * `git checkout tags/vX.X.X`
- * `cd ../../ && git add third_party/repository_dir && git commit -m '...' && git push`
+ [Fetch](https://cliutils.gitlab.io/modern-cmake/chapters/projects/fetch.html)
 
 ## CMake Example
  * [ttroy50/cmake-examples](https://github.com/ttroy50/cmake-examples)
